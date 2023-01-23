@@ -43,3 +43,5 @@ for section in keys:
         if k not in config[section].keys():
             log.error(f"Missing value in config. Key: {k}")
             raise RuntimeError
+
+log.info("Config downloaded successfully")

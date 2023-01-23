@@ -8,14 +8,27 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-logger = logging.getLogger("full_log")
+from src.config.config_reader import config
+
+log = logging.getLogger("handler")
 
 class Page():
-    def __init__(self):
+    def __init__(self, url: str = "NotSpecified") -> None:
         self.options = webdriver.ChromeOptions()
         self.options.add_experimental_option('excludeSwitches', ['enable-logging'])
         self.options.headless = False # TODO: make this configurable
         self.driver = webdriver.Chrome(options=self.options)
+        self.url = url
+
+        if "NotSpecified" in self.url:
+            raise ValueError("Expected page url")
+
+        conf = config["html_classes"]
+        self.location_button = conf["location_button"]
+        self.clear_input = conf["clear_input"]
+        self.input_field = conf["input_field"]
+        self.ok_button = conf["ok_button"]
+        log.info("Page initialized successfully")
 
     def click_button(self, class_name: str) -> None:
         """Finds a button by its classname and clicks it"""
@@ -23,7 +36,7 @@ class Page():
         button = WebDriverWait(self.driver, 20).until(
             EC.element_to_be_clickable((By.CLASS_NAME, class_name)))
         button.click()
-        logger.INFO(f"Button {class_name} clicked")
+        log.info(f"Button {class_name} clicked")
         time.sleep(2)
 
     def make_input(self, class_name: str, value: str) -> None:
@@ -32,7 +45,7 @@ class Page():
         for letter in value:
             input_field.send_keys(letter)
             time.sleep(0.1)
-        logger.INFO(f"Input '{value}' made in {class_name}")
+        log.info(f"Input '{value}' made in {class_name}")
         time.sleep(2)
 
     def approve_choices(self, class_name: str) -> None:
@@ -42,7 +55,7 @@ class Page():
         option.send_keys(Keys.ARROW_DOWN)
         time.sleep(1)
         option.send_keys(Keys.RETURN)
-        logger.INFO(f"First dropdown option selected in {class_name}")
+        log.info(f"First dropdown option selected in {class_name}")
         time.sleep(2)
     
     def get_html_text(self, html_string: str) -> str:
@@ -54,27 +67,31 @@ class Page():
         try:
             with open(filename, "w", encoding="utf-8") as file:
                 file.write(soup_content.prettify())
-                logger.INFO(f"File {filename} saved to html")
+                log.info(f"File {filename} saved to html")
         except Exception as error:
-            logger.error(f"Error saving file {filename}")
+            log.error(f"Error saving file {filename}")
             raise (f"Could not write to file: {filename}:{error}")
 
-    def parse_all(self) -> None:
+    def set_address(self, address: str) -> None:
         """Handler for calling all functions and setting an address"""
         # Open the website
-        self.driver.get(self.URL)
-        logger.INFO("Page loaded successfully")
+        try:
+            self.driver.get(self.url)
+            log.info("Page loaded successfully")
+        except Exception as error:
+            log.error(f"Could not load url {self.url}: {error}")
+            raise
         time.sleep(5)
         try:
             # Your location button
-            self.click_button('bzscopr.c14xrn6c.cow0qbn.a71den4.m16coeem.m1wd6zeg')
+            self.click_button(self.location_button)
             # Clear text in input field button
-            self.click_button("c12fmzph")
+            self.click_button(self.clear_input)
             # Make input in input field
-            self.make_input("i164506l", self.address)
+            self.make_input(self.input_field, address)
             # Press enter to approve the input
-            self.approve_choices("i164506l")
+            self.approve_choices(self.input_field)
             # Click OK button
-            self.click_button("bzscopr.f19ph74x.c14xrn6c.cow0qbn.a71den4.m16coeem.m1wd6zeg.w3gf8dt")
+            self.click_button(self.ok_button)
         except Exception as error:
-            print(error)
+            log.error(f"Could not set address {self.url}: {error}")
