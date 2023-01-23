@@ -19,24 +19,15 @@ keys = {
         "snacks_url",
         "energetics_url"
     },
-    "snacks": {
-        "snack_class",
-        "snack_name",
-        "snack_price",
-        "snack_comment",
-        "snack_weight",
-        "snack_discount",
-        "snack_image",
-        "snack_excel_save_name"
-    },
-    "energetics": {
-        "energetic_class",
-        "energetic_name",
-        "energetic_price",
-        "energetic_comment",
-        "energetic_weight",
-        "energetic_discount",
-        "energetic_image",
+    "good_classes": {
+        "good_class",
+        "good_name",
+        "good_price",
+        "good_comment",
+        "good_weight",
+        "good_discount",
+        "good_image",
+        "snack_excel_save_name",
         "energetic_excel_save_name"
     },
     "html_classes": {
