@@ -8,9 +8,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from src.config.config_reader import config
+from src.config.config_reader import get_config
 
-log = logging.getLogger("handler")
+logger = logging.getLogger("handler")
+
+config = get_config()
 
 class Page():
     def __init__(self, url: str = "NotSpecified") -> None:
@@ -28,7 +30,7 @@ class Page():
         self.clear_input = conf["clear_input"]
         self.input_field = conf["input_field"]
         self.ok_button = conf["ok_button"]
-        log.info("Page initialized successfully")
+        logger.info("Page initialized successfully")
 
     def click_button(self, class_name: str) -> None:
         """Finds a button by its classname and clicks it"""
@@ -36,7 +38,7 @@ class Page():
         button = WebDriverWait(self.driver, 20).until(
             EC.element_to_be_clickable((By.CLASS_NAME, class_name)))
         button.click()
-        log.info(f"Button {class_name} clicked")
+        logger.info(f"Button {class_name} clicked")
         time.sleep(2)
 
     def make_input(self, class_name: str, value: str) -> None:
@@ -45,7 +47,7 @@ class Page():
         for letter in value:
             input_field.send_keys(letter)
             time.sleep(0.1)
-        log.info(f"Input '{value}' made in {class_name}")
+        logger.info(f"Input '{value}' made in {class_name}")
         time.sleep(2)
 
     def approve_choices(self, class_name: str) -> None:
@@ -55,7 +57,7 @@ class Page():
         option.send_keys(Keys.ARROW_DOWN)
         time.sleep(1)
         option.send_keys(Keys.RETURN)
-        log.info(f"First dropdown option selected in {class_name}")
+        logger.info(f"First dropdown option selected in {class_name}")
         time.sleep(2)
     
     def get_html_text(self, html_string: str) -> str:
@@ -67,9 +69,9 @@ class Page():
         try:
             with open(filename, "w", encoding="utf-8") as file:
                 file.write(soup_content.prettify())
-                log.info(f"File {filename} saved to html")
+                logger.info(f"File {filename} saved to html")
         except Exception as error:
-            log.error(f"Error saving file {filename}")
+            logger.error(f"Error saving file {filename}")
             raise (f"Could not write to file: {filename}:{error}")
 
     def set_address(self, address: str) -> None:
@@ -77,9 +79,9 @@ class Page():
         # Open the website
         try:
             self.driver.get(self.url)
-            log.info("Page loaded successfully")
+            logger.info("Page loaded successfully")
         except Exception as error:
-            log.error(f"Could not load url {self.url}: {error}")
+            logger.error(f"Could not load url {self.url}: {error}")
             raise
         time.sleep(5)
         try:
@@ -93,5 +95,6 @@ class Page():
             self.approve_choices(self.input_field)
             # Click OK button
             self.click_button(self.ok_button)
+            self.driver.quit()
         except Exception as error:
-            log.error(f"Could not set address {self.url}: {error}")
+            logger.error(f"Could not set address {self.url}: {error}")

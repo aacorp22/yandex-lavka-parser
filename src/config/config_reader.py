@@ -4,10 +4,6 @@ import logging
 
 log = logging.getLogger("config")
 
-_conf = configparser.ConfigParser()
-_conf.read("config.ini", encoding="utf-8")
-config = {section: dict(_conf.items(section)) for section in _conf.sections()}
-
 keys = {
     "locations": {
         "location1",
@@ -38,10 +34,18 @@ keys = {
     }
 }
 
-for section in keys:
-    for k in keys[section]:
-        if k not in config[section].keys():
-            log.error(f"Missing value in config. Key: {k}")
-            raise RuntimeError
+def get_config() -> dict:
+    log.info("Starting config parser")
+    _conf = configparser.ConfigParser()
+    _conf.read("config.ini", encoding="utf-8")
+    config = {section: dict(_conf.items(section)) for section in _conf.sections()}
+    
+    for section in keys:
+        for k in keys[section]:
+            if k not in config[section].keys():
+                log.error(f"Missing value in config. Key: {k}")
+                raise RuntimeError
 
-log.info("Config downloaded successfully")
+    log.info("Config downloaded successfully")
+    
+    return config
